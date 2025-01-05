@@ -3,30 +3,19 @@ name: Upload Website
 on:
   push:
     branches:
-      - main  # Trigger workflow on pushes to the 'main' branch
+    - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Check out the repository
-      - name: Checkout Repository
-        uses: actions/checkout@v3  # Use the latest stable version (not master)
-
-      # Step 2: Sync files with S3
-      - name: Sync to S3
-        uses: jakejarvis/s3-sync-action@v1.0.7  # Use a specific release for stability
-        with:
-          args: --acl public-read --follow-symlinks --delete
-        env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }} # S3 bucket name stored in GitHub Secrets
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} # AWS Access Key ID stored in GitHub Secrets
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # AWS Secret Access Key stored in GitHub Secrets
-          AWS_REGION: 'eu-north-1'   # Specify your AWS region (modify if needed)
-          SOURCE_DIR: 'public'      # Specify the directory to sync (modify if needed)
-
-      # Optional: Add a post-deployment step to confirm the upload
-      - name: Confirm Upload
-        run: |
-          echo "Website successfully uploaded to ${{ secrets.AWS_S3_BUCKET }} in the ${{ env.AWS_REGION }} region."
+    - uses: actions/checkout@master
+    - uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --acl public-read --follow-symlinks --delete
+      env:
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'eu-north-1'   # optional: defaults to us-east-1
+        SOURCE_DIR: 'public'      # optional: defaults to entire repository
